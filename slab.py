@@ -19,7 +19,10 @@ class Slab(object):
         self.shape = None
         self.seismicity = None
         self.slabneighbors = None
+
+        #Possible to add these as dictionary structures
         self.slab1_details = None
+        self.Fukaoslab_details = None
 
     def add_slab1_details(self,indict):
         '''
@@ -27,11 +30,22 @@ class Slab(object):
         '''
         self.slab1_details = indict
 
+    def add_Fukao_slab_details(self,indict):
+        '''
+        Add a dictionary containing information from the Fukao and Obayashi GAP_P4 slab definitions
+        '''
+        self.Fukaoslab_details = indict
+
     def print_slab1_details(self):
         '''
         For debugging
         '''
         print(self.slab1_details)
+
+    def map_Fukao_slabs(self):
+        '''
+        Creates a globe map showing the Fukao slab bounding boxes
+        '''
 
     def map_slab1(self):
         '''
