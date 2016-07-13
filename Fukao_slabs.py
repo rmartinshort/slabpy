@@ -27,7 +27,7 @@ def read_slabdata():
 	slabs['Kermadec'] = {'Bounds' : [157,-37,190,-26]}
 	slabs['Peruvian'] = {'Bounds' : [270,-15,307,6.7]}
 	slabs['Chilean'] = {'Bounds' : [270,-45,307,-15]}
-	slabs['Central_American'] = {'Bounds' : [270,-45,307,-15]}
+	slabs['Central_American'] = {'Bounds' : [249,4.5,282,33]}
 
 	#For these two regions, we need an oblique box. The coodinates are entered as follows
 	#[upper left,lower left,lower right,upper right]
@@ -49,8 +49,20 @@ def read_slabdata():
 
 if __name__ == '__main__':
 
+	'''Testing - plot the Fukao slab boxes'''
+
 	FukaoSlabs = read_slabdata()
 	print(FukaoSlabs)
+
+	slist = FukaoSlabs.slabs
+
+	#This is going to plot a countour map of each of the slab1.0 slabs
+	for slab in slist:
+		slab.map_Fukao_slab_box()
+
+	#This brings up the interactive map suite
+	FukaoSlabs.InteractiveMap(plotslabs=True)
+
 
 
 

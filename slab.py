@@ -5,7 +5,6 @@ from __future__ import print_function
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
-import plotting_tools as pts
 
 class Slab(object):
 
@@ -42,10 +41,43 @@ class Slab(object):
         '''
         print(self.slab1_details)
 
-    def map_Fukao_slabs(self):
+    def map_Fukao_slab_box(self):
         '''
-        Creates a globe map showing the Fukao slab bounding boxes
+        Creates a map showing the Fukao slab bounding box corresponding to this slab
         '''
+
+        if self.Fukaoslab_details:
+            bbox = self.Fukaoslab_details['Bounds']
+
+            print(bbox)
+
+            if (len(bbox) == 4):
+                minlon = bbox[0]
+                minlat = bbox[1]
+                maxlon = bbox[2]
+                maxlat = bbox[3]
+
+                figure = plt.figure(facecolor='white',figsize=(10,8))
+                a = figure.add_subplot(111)
+                m = Basemap(ax=a,lat_0=(minlat+((maxlat-minlat)/2.0)),lon_0=(minlon+((maxlon-minlon)/2.0)),resolution ='l',llcrnrlon=minlon,llcrnrlat=minlat,urcrnrlon=maxlon,urcrnrlat=maxlat)
+                m.drawparallels(np.arange(minlat,maxlat,((maxlat-minlat)/5)),labels=[1,1,0,0],linewidth=0.5,fontsize=10)
+                m.drawmeridians(np.arange(minlon,maxlon,((maxlon-minlon)/5)),labels=[0,0,0,1],linewidth=0.5,fontsize=10)
+                m.drawcoastlines()
+                m.fillcontinents()
+
+                #add a figure title
+                a.set_title('Fukao_Obayashi slab region: %s' %self.name)
+
+                plt.show()
+
+            elif (len(bbox) == 8):
+                print('bbox contains boundary coords')
+
+
+
+        else:
+            print('Nothing to do: no Fukaoslab_details added!')
+
 
     def map_slab1(self):
         '''
@@ -78,7 +110,7 @@ class Slab(object):
 
             m.drawcoastlines()
 
-            #Add tectonic plate boundaries - this doesn't work very well
+            #Add tectonic plate boundaries - this doesn't work very well and may not be defunct
             # self.faults = pts.read_faults('data/plates.xy')
             # for i in self.faults:
             #     faults_lons = self.faults[i][0]

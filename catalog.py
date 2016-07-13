@@ -5,6 +5,7 @@ import numpy as np
 
 from slab import Slab
 import matplotlib.pyplot as plt
+from Mapper import DrawableMap
 
 """
 Shamelessly copied implementations from Stream() and Trace() in ObsPy
@@ -53,3 +54,13 @@ class Catalog(object):
         plt.plot(self.list(param1),self.list(param2),'.k' )
         plt.xlabel(param1)
         plt.ylabel(param2)
+
+    def InteractiveMap(self,plotslabs=False):
+        '''
+        Load an interactive map instance and plot the slab information, if available and desired
+        '''
+
+        if plotslabs == True:
+            catalogmap = DrawableMap(slabcat=self.slabs)
+        catalogmap.showmap()
+

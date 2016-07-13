@@ -1,0 +1,62 @@
+#!/bin/tcsh -f
+
+set GMT  = gmt4
+set WDIR = $PWD
+set LCL  = $WDIR
+set BIN  = $LCL/bin
+
+#-- C-shell of GMT plotting commmands
+#-- to make a 180-degrees wide
+#-- cross-section through model S40RTS.
+#-- 
+#-- SYNTAX:
+#-- mkcross lat lon azimuth [MODEL]
+#--
+#-- lat/lon is midpoint of the cross-section,
+#-- azimuth is clockwise from north
+#-- output file will be called "${slice}.ps"
+#--
+#------------------------------------------------
+
+if ( $#argv != 3 ) then
+  echo ""
+  echo "Usage:       mkcr_all lat lon azimuth"
+  echo "Example:"
+  echo "             mkcr_all -20 30 30"
+  echo "             to plot tomo models along a cross-section through eastern Africa"
+  echo ""
+  exit 0
+endif
+
+#--------------------
+#-- Regions:
+set lat       = $1
+set lon       = $2
+set az        = $3
+endif
+#-- shear velocity variation from -1.5% to +1.5% 
+set mxc       = 1.5
+
+echo "Plotting through [$lat $lon] with an azimuth of $az"
+
+
+#---------------------------------------------------------------
+if (-e .gmtcommands ) /bin/rm .gmtcommands .gmtdefaults
+
+$GMT gmtset PAPER_MEDIA letter+
+$GMT gmtset MEASURE_UNIT inch
+echo $LCL/scripts/slice_all $lat $lon $az $mxc
+$LCL/scripts/slice_all $lat $lon $az $mxc 
+
+#-- before
+#-- ps2pdf  -dColorConversionStrategy=/sRGB -dProcessColorModel=/DeviceRGB slice.ps
+$GMT ps2raster -Tf slice.ps
+mv slice.pdf output_slices/slice_$lon.$lat.$az.pdf
+rm slice.ps
+
+#-- clean up
+rm in_mdlwellln_jr gcpath ticks mkcut.in mkcut.out col.cpt
+rm in_mkrb uit.grd uit.xy ?.xyz text
+
+#display
+open output_slices/slice_$lon.$lat.$az.pdf

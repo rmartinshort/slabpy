@@ -1,0 +1,100 @@
+#!/bin/tcsh -f
+
+
+set GMT  = gmt4
+
+set WDIR = /Users/rmartinshort/Documents/Workshops/CIDER_2016/tomo_models
+set LCL  = $WDIR/TOMO_PLOTTING_CIDER
+set BIN  = $LCL/bin
+
+#-- input 
+set rawfl = $1
+set mxc   = $2
+set depth = $3
+
+#-- spherical harmonics
+#-- (lmin=1: takes out spherical average)
+set lmin  = 1
+set lmax  = 40
+set isp   = 1
+
+#-- Plot hotspot locations (=1 is yes)
+set plot_hotspots = 0
+set hsptfl = $LCL/etc/RitsAllen_hotspot_list
+set hsptfl = $LCL/etc/Sleep_hotspot_list
+#-- Plot plate boundaries (=1 is yes)
+set plot_plateboundaries = 1
+set pltbfl = $LCL/etc/plate_boundaries.gmt
+
+#-- discreet colourscale (=0)
+set icont = 0
+#-- black-and-white =0; colour =1
+set col   = 1
+#-- Using Yu Gu's GU12 coulour scheme (12 values)
+#-- or TOMOGREY (6 values) for black-and-white
+#-- plotting grid contours (=1 is yes)
+#-- 0 is recommended when using gu12.chj (i.e. when col = 1)
+set grid_contours = 0
+
+if ($col == 1) then
+  echo $LCL/colourscales/gu12.chj      >  in_mkrb
+else
+  echo $LCL/colourscales/tomogrey6.chj >  in_mkrb
+endif
+echo $icont          >> in_mkrb
+echo $mxc            >> in_mkrb
+$BIN/mkrb_jr          < in_mkrb > col.cpt
+
+#makecpt -C$cpt -T-$mxc/$mxc/0.3 > col.cpt
+
+#----- projection -------------
+set reg1   = -R-180/180/-89.9999/89.9999
+set reg1   = -R-180/180/-90/90
+set prjwd  =  6
+#-- international dateline
+set projct =  180
+#-- indian ocean
+set projct =  85
+#-- central meridian
+set projct =  0
+#-- eastern Asia
+set projct =  135
+set proj   = -JW$projct/$prjwd
+set bord = -Bg90/g45
+#------------------------------
+
+set xmin   = -180
+
+echo Turning the ".raw" file into "x-y-z" file
+echo $rawfl      >  in_raw2xyz
+echo map.xyz     >> in_raw2xyz
+echo $isp        >> in_raw2xyz
+echo 1.00        >> in_raw2xyz
+echo $lmin $lmax >> in_raw2xyz
+echo $xmin       >> in_raw2xyz
+$BIN/raw2xyz_jr   < in_raw2xyz
+
+#GMT surface  map.xyz -Gmap.grd -I$isp $reg1
+#GMT grdimage map.grd -Ccol.cpt  $proj $reg1 -X1.5 -Y4 -Ei2000    -P -V -K >  map.ps
+$GMT/surface  map.xyz -Gmap.grd -I$isp $reg1
+$GMT/grdimage map.grd -Ccol.cpt  $proj $reg1 -X1.5 -Y4 -Ei2000    -P -V -K >  map.ps
+echo u1
+if ( $grid_contours ) then
+    #GMT grdcontour map.grd -Ccol.cpt -A- $proj $reg1   -O -P -V -K >> map.ps
+    $GMT/grdcontour map.grd -Ccol.cpt -A- $proj $reg1   -O -P -V -K >> map.ps
+endif
+echo u2
+
+#-- coast lines not istalled
+echo u3
+#GMT pscoast $reg1 $proj -Dc -W2 -A40000                -O -P -V -K >> map.ps
+$GMT/pscoast $reg1 $proj -Dc -W2 -A40000                -O -P -V -K >> map.ps
+echo u4
+
+#-- plate boundaries
+echo u5
+if ( $plot_plateboundaries) then
+  #GMT psxy  $reg1 $proj $pltbfl -W1/255   -M  $bord    -O -P -V -K >> map.ps
+  $GMT/psxy  $reg1 $proj $pltbfl -W1/255   -M  $bord    -O -P -V -K >> map.ps
+endif
+echo u6

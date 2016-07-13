@@ -1,0 +1,45 @@
+#!/bin/csh -f
+#-- making D" arcs between event and stations spaced at 30-deg azimuths
+
+set PLOT = $TOMO/S20RTS_plotting
+set BIN  = $PLOT/bin
+
+set arc = 120
+set ddp = 2691
+
+/bin/rm arcs
+
+set cmt = $1
+
+set elat = `hvdcode_short $cmt | colgrep -c 4`
+set elon = `hvdcode_short $cmt | colgrep -c 6`
+set edep = `hvdcode_short $cmt | colgrep -c 8`
+
+set d1 = `taup_pierce -ph Sdiff -deg 120 -h 555 -pierce $ddp -nodiscon | tail -2 | head -1 | colgrep -c 1`
+set d2 = `taup_pierce -ph Sdiff -deg 120 -h 555 -pierce $ddp -nodiscon | tail -2 | tail -1 | colgrep -c 1`
+
+foreach az (0 30 60 90 120 150 180 210 240 270 300 330 )
+  set p1_lat = `$BIN/distaz2latlon $elat $elon $d1 $az | colgrep -c 1`
+  set p1_lon = `$BIN/distaz2latlon $elat $elon $d1 $az | colgrep -c 2`
+  set p2_lat = `$BIN/distaz2latlon $elat $elon $d2 $az | colgrep -c 1`
+  set p2_lon = `$BIN/distaz2latlon $elat $elon $d2 $az | colgrep -c 2`
+  echo ">"                  >> arcs
+  echo "$p1_lon $p1_lat"    >> arcs
+  echo "$p2_lon $p2_lat"    >> arcs
+end
+
+#----- projection -------------
+set reg    = -R-180/180/-90/90
+set prjwd  =  6
+#-- international dateline
+set projct =  180
+#-- indian ocean
+set projct =  85
+#-- central meridian
+set projct =  0
+#-- eastern Asia
+set projct =  135
+set proj   = -JW$projct/$prjwd
+#------------------------------
+
+psxy arcs $reg $proj -W1/255 -m -O -P -V -K >> map.ps

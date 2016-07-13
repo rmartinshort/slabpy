@@ -1,0 +1,100 @@
+#!/bin/tcsh -f
+
+set GMT  = gmt4
+
+set WDIR = /Users/rmartinshort/Documents/Workshops/CIDER_2016/tomo_models
+set LCL  = $WDIR/TOMO_PLOTTING_CIDER
+set BIN  = $LCL/bin
+
+#-- input 
+set mxc   = $1
+set depth = $2
+
+#-- spherical harmonics
+#-- (lmin=1: takes out spherical average)
+set lmin  = 1
+set lmax  = 40
+set isp   = 1
+
+#-- Plot hotspot locations (=1 is yes)
+set plot_hotspots = 0
+set hsptfl = $LCL/etc/Sleep_hotspot_list
+set hsptfl = $LCL/etc/RitsAllen_hotspot_list
+#-- Plot plate boundaries (=1 is yes)
+set plot_plateboundaries = 1
+set pltbfl = $LCL/etc/plate_boundaries.gmt
+
+#-- discreet colourscale (=0)
+set icont = 0
+#-- black-and-white =0; colour =1
+set col   = 1
+#-- Using Yu Gu's GU12 coulour scheme (12 values)
+#-- or TOMOGREY (6 values) for black-and-white
+#-- plotting grid contours (=1 is yes)
+#-- 0 is recommended when using gu12.chj (when col = 1)
+set grid_contours = 0
+
+if ($col == 1) then
+  echo $LCL/colourscales/gu12.chj      >  in_mkrb
+else
+  echo $LCL/colourscales/tomogrey6.chj >  in_mkrb
+endif
+echo $icont          >> in_mkrb
+echo $mxc            >> in_mkrb
+$BIN/mkrb_jr          < in_mkrb > col.cpt
+
+#----- projection -------------
+set reg    = -R-180/180/-89.99/89.99
+set reg    = -R0/360/-90/90
+set prjwd  =  3
+#-- international dateline
+set projct =  180
+#-- indian ocean
+set projct =  85
+#-- central meridian
+set projct =  0
+#-- eastern Asia
+set projct =  135
+
+set proj   = -JW$projct/$prjwd
+set bord   = -Bg90/g45
+#------------------------------
+
+set xmin   = -180
+set xmin   = 0
+
+@ i=0
+foreach rawfl ( S40RTS.raw SEM_WM_s.raw GypSum_S.raw s362ani_m_s.raw )
+@ i++
+echo Turning the ".raw" file into "x-y-z" file
+echo $rawfl      >  in_raw2xyz
+echo map.xyz     >> in_raw2xyz
+echo $isp        >> in_raw2xyz
+echo 1.00        >> in_raw2xyz
+echo $lmin $lmax >> in_raw2xyz
+echo $xmin       >> in_raw2xyz
+$BIN/raw2xyz_jr < in_raw2xyz
+
+set name = $rawfl:r
+
+$GMT surface map.xyz -Gmap.grd $reg -I1
+if ($i == 1) then
+  $GMT grdimage map.grd -Ccol.cpt $proj $reg  -X2.0   -Y8    -Ei2000    -P -V -K >  map.ps
+else
+  $GMT grdimage map.grd -Ccol.cpt $proj $reg  -X-0.2  -Y-1.8 -Ei2000 -O -P -V -K >> map.ps
+endif
+if ( $grid_contours ) then
+    $GMT grdcontour map.grd -Ccol.cpt -A- $proj $reg   -O -P -V -K >> map.ps
+endif
+$GMT pscoast $reg $proj $bord         -Dl -A40000 -W4  -O -P -V -K >> map.ps
+
+#-- hotspots and plate boundaries
+if ( $plot_plateboundaries) then
+  $GMT psxy  $reg $proj $pltbfl -W4/255   -M           -O -P -V -K >> map.ps
+endif
+if ( $plot_hotspots ) then
+  awk '{print $3, $2}' $hsptfl | psxy $reg $proj -G255 -W1 -St0.05 -O -P -K >> map.ps
+endif
+echo "315 0 11 0 0 BL $name" > text
+$GMT pstext text $reg $proj -X0.2 -N -O -P -K >> map.ps
+end
