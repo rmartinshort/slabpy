@@ -56,11 +56,9 @@ if __name__ == '__main__':
 
 	slist = FukaoSlabs.slabs
 
-	#This is going to plot a countour map of each of the slab1.0 slabs
-	for slab in slist:
-		slab.map_Fukao_slab_box()
+	#for slab in slist:
+	#	slab.map_Fukao_slab_box()
 
-	#This brings up the interactive map suite
 	FukaoSlabs.InteractiveMap(plotslabs=True)
 
 

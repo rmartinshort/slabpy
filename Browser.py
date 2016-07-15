@@ -2,6 +2,8 @@
 import numpy as np
 import Tools as misctools
 import matplotlib.pyplot as plt
+import Tomo_slice_manipulation_tools as slicetools
+
 
 
 class PointBrowser:
@@ -86,8 +88,11 @@ class PointBrowser:
 
 
     def onpick(self, event):
-
-      '''define what happens when the user presses the cursor'''
+      '''
+      Define what happens when the user presses the cursor. If the user chooses to make a cross section
+      the Ritsema tools are automatically called and slices though the various models are plotted. A stack of 
+      tomography slices is also made and contours associated with the slab are traced 
+      '''
 
       if self.drawinglines:
 
@@ -103,13 +108,17 @@ class PointBrowser:
 
             midlon = self.linelons[0]
             midlat = self.linelats[0]
+            lon1 = self.linelons[1]
+            lat1 = self.linelats[1]
 
             #Determine azimuth from the start point to the selected location
             azimuth = misctools.coords_for_profile(self.linelons[0],self.linelats[0],self.linelons[1],self.linelats[1])
 
-            print 'Getting ready to run Ritsema codes with midlon/midlat = %g/%g and azimuth of %g' %(midlon,midlat,azimuth)
-            misctools.Ritsema_180_sections(midlon,midlat,azimuth)
+            #print 'Getting ready to run Ritsema codes with midlon/midlat = %g/%g and azimuth of %g' %(midlon,midlat,azimuth)
+            #misctools.Ritsema_180_sections(midlon,midlat,azimuth)
 
+            print 'Getting ready to run Becker codes with midlon/midlat = %g/%g and azimuth of %g' %(midlon,midlat,azimuth)
+            misctools.Becker_slice(midlon, midlat, lon1, lat1, azimuth)
 
           else:
             print 'No profile selected. Continue'
