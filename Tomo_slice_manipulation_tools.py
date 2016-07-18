@@ -9,6 +9,7 @@ import glob
 import os
 from skimage import measure
 
+
 def gmt_norm_stack(files,plot=True):
 	'''Uses gmt to normalize a set of GRD files and then stack them - the aim is to see where they agree most'''
 
@@ -38,13 +39,13 @@ def gmt_norm_stack(files,plot=True):
 
 	return basefilename+'SUM.nc'
 
-def plotfigs(model=None,axobj=None,i=0,infile=None,stack=True,datatracker=None):
+def plotfigs(model=None,axobj=None,i=0,infile=None,stack=True,datatracker=None,name=None,axz=None,quakes=None):
 
 	'''
 	Plotting command for the becker slice'''
 
 	if not axobj:
-		fig = plt.figure(facecolor='white')
+		fig = plt.figure(facecolor='white',figsize=(10,6))
 		datatracker = {}
 		axobj = fig
 
@@ -71,8 +72,11 @@ def plotfigs(model=None,axobj=None,i=0,infile=None,stack=True,datatracker=None):
 	elif i==4:
 		ax = axobj.add_subplot(325)
 
+	frame1 = plt.gca()
 
-	image = ax.imshow(data, interpolation='nearest',aspect='auto',cmap=plt.cm.jet_r)
+
+	image = ax.imshow(data, interpolation='nearest',aspect='auto',cmap=plt.cm.seismic_r)
+
 
 	#plot on the boundaries:
 	#This assumes that the bottom of the map corresponds to 2000km depth! Its possible to change this, so 
@@ -80,17 +84,51 @@ def plotfigs(model=None,axobj=None,i=0,infile=None,stack=True,datatracker=None):
 	thousandkm = int(len(depths)/2.0)
 	sixsixtykm = int(len(depths)*6.6/20.0)
 
+
 	ax.plot([0,len(lengths)],[thousandkm,thousandkm],'k--',label='1000km')
 	ax.plot([0,len(lengths)],[sixsixtykm,sixsixtykm],'k-',label='660km')
+
+	#Get earthquake information if available and scale to the dimensions of matrix
+	#This is working to some extent, but adds to the run time and may fail in certain cases
+	#In the end it may not be that useful - may be better to plot earthquakes on a different plot,
+	#with just the slab1.0 contours, for example
+
+	if quakes:
+		if (len(quakes[0]) > 1):
+
+			# quakepoints = np.array(quakes[0])
+			# quakedepths = -np.array(quakes[1])
+			# maxlen = float(quakes[2])
+
+			# depthinc = len(depths)/2000.0
+			# xinc = len(lengths)/maxlen
+
+			# print depthinc,xinc
+
+			# quakedepths = quakedepths*depthinc
+			# quakepoints = len(lengths) - quakepoints*xinc
+
+			# print quakedepths
+			# print quakepoints
+
+			# ax.plot(quakepoints,quakedepths,'g.',linewidth=0.4)
+
+			if i == 2:
+				ax.text(30, 200, 'Max earthquake depth: %g km' %-min(quakes[1]), style='italic',bbox={'facecolor':'red', 'alpha':0.5, 'pad':10})
 
 	ax.set_title('%s' %model)
 
 	ax.set_ylim([len(depths),0])
 	ax.set_xlim([0,len(lengths)])
 
-	cbar_ax = axobj.add_axes([0.85, 0.05, 0.05, 0.2])
+	cbar_ax = axobj.add_axes([0.88, 0.03, 0.03, 0.25])
 	colors = image.set_clim(-1.5,1.5)
 	axobj.colorbar(image,cbar_ax)
+
+	#Remove the numbers on the x and y axes - these are distrating
+
+	frame1.axes.get_xaxis().set_visible(False)
+	frame1.axes.get_yaxis().set_visible(False)
 
 	return axobj,datatracker
 
@@ -134,7 +172,7 @@ def tracestackedslab(infile,depthinc=5,llinc=((6371*np.pi)/360),cval=0.5):
 
 	plt.set_cmap('jet_r')
 
-	ax.imshow(data, interpolation='nearest',aspect='auto')
+	ax.imshow(data, interpolation='linear',aspect='auto')
 
 	ax.plot([0,len(lengths)],[thousandkm,thousandkm],'k--',label='1000km')
 	ax.plot([0,len(lengths)],[sixsixtykm,sixsixtykm],'k-',label='660km')

@@ -5,7 +5,7 @@ import numpy as np
 from slab import Slab
 from catalog import Catalog
 
-def read_slabdata():
+def read_slabdata(slabcat=None):
 	'''
 	Creates slab objects for the slabs identified by Fukao & Obayashi (2013)
 	'''
@@ -35,7 +35,10 @@ def read_slabdata():
 	slabs['Kurile_N'] = {'Bounds' : [134.5,65.5,130.5,61.5,158.5,43,162.5,47]}
 	slabs['Kurile_S'] = {'Bounds' : [127.5,58.5,123.5,54.5,151.5,36,155.5,40]}
 
-	FukaoSlabs = Catalog()
+	if slabcat:
+		FukaoSlabs = slabcat
+	else:
+		FukaoSlabs = Catalog()
 
 	for slabname in slabs:
 

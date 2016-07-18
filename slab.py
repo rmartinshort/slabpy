@@ -35,7 +35,7 @@ class Slab(object):
         '''
         self.Fukaoslab_details = indict
 
-    def print_slab1_details(self):
+    def return_slab1_details(self):
         '''
         For debugging
         '''

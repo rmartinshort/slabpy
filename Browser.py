@@ -18,13 +18,15 @@ class PointBrowser:
         self.linelons = None
         self.drawinglines = None
         self.arrow = None
+        self.helpfultext = None
 
-    def addobjs(self,mapobj,figobj):
+    def addobjs(self,mapobj,figobj,axobj):
 
       '''Add a map object so that we can plot on it'''
 
       self.mapobj = mapobj
       self.figobj = figobj
+      self.axobj = axobj
 
     def updatelinecoords(self):
 
@@ -56,14 +58,20 @@ class PointBrowser:
           self.points[0].remove()
         if self.arrow:
           self.arrow.remove()
+        if self.helpfultext:
+          self.helpfultext.remove()
 
         self.linelats = [self.startlat,lat]
         self.linelons = [self.startlon,lon]
         xevent,yevent = self.mapobj(self.linelons,self.linelats)
 
+        az = misctools.coords_for_profile(self.startlon,self.startlat,lon,lat)
+
         self.arrow = plt.arrow(xevent[0],yevent[0],xevent[1]-xevent[0],yevent[1]-yevent[0],fc="k", ec="k", linewidth = 2, head_width=3, head_length=3)
         self.line = self.mapobj.plot(xevent,yevent,'r-',linewidth=2,alpha=0.9)
         self.points = self.mapobj.plot(xevent,yevent,'ko')
+
+        self.helpfultext = self.axobj.text(self.startlon, self.startlat, 'lon: %g lat: %g az: %g' %(self.startlon,self.startlat,az), style='italic',bbox={'facecolor':'white', 'alpha':0.5, 'pad':10})
         self.figobj.canvas.draw()
 
     def releasepick(self,event):
@@ -118,7 +126,7 @@ class PointBrowser:
             #misctools.Ritsema_180_sections(midlon,midlat,azimuth)
 
             print 'Getting ready to run Becker codes with midlon/midlat = %g/%g and azimuth of %g' %(midlon,midlat,azimuth)
-            misctools.Becker_slice(midlon, midlat, lon1, lat1, azimuth)
+            misctools.Becker_slice(midlon, midlat, lon1, lat1, azimuth,name='User_defined',showplot=True)
 
           else:
             print 'No profile selected. Continue'
