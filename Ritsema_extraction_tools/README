@@ -13,7 +13,7 @@ the tomoraphy models that get extracted
 
 To compile:
 
-- Go to lib/libS20a and type 'Make'
+- Go to lib/libS20a and type 'Make' (if libS20.a is present, delete it)
 - Go to src and type 'Make'
 
 This requires gcc 
