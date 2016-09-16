@@ -12,10 +12,15 @@ from mpl_toolkits.basemap import Basemap
 import datetime
 from obspy import UTCDateTime
 
+
+#--------------------------------------------
+#Important: The paths to these data directories must be updated on a new system
+# the becker directory also includes all of T.Becker's extraction code too
+#--------------------------------------------
 global becker_data_directory
-becker_data_directory = '/Users/rmartinshort/Documents/Workshops/CIDER_2016/Slab_group2/datasets/Profile_plotting'
+becker_data_directory = '/Volumes/TOSHIBA EXT/Workshops/CIDER_2016/Slab_group2/datasets/Profile_plotting'
 global topofile
-topofile = '/Users/rmartinshort/Documents/Workshops/CIDER_2016/plumes/Bathy/gebco_08.nc'
+topofile = '/Volumes/TOSHIBA EXT/Workshops/CIDER_2016/plumes/Bathy/gebco_08.nc'
 
 
 
@@ -54,6 +59,103 @@ def read_faults(input_file):
             
     return faults
 
+def cat2list(cat, mt_type = 'Moment_tensor'):
+    '''
+    Function to convert catalog object to list (easy work with)
+    Input:
+        cat - catalog object
+        mt_type - flag of getting 'Focal' or 'Moment_tensor'
+    Return:
+        earthquakes - list of earthquake information
+        mt - list of focal/moment_tensor information
+        event_id - event ID corresponding to the earthquakes
+        quarry_blast - list of quarry blast list
+    '''
+    
+    eq_matrix = []
+    evtime_mat = []
+    mt = []
+    event_id =[]
+    
+    #mt_type can be:
+    #'Focal'
+    #'Moment_tensor'
+    #'Both'
+    
+    for index in range(cat.count()):
+        myevent = cat[index]
+        
+        try:
+        
+            origins = myevent.origins[0]
+            evtime_mat.append(origins.time)
+            evla = origins.latitude
+            evlo = origins.longitude
+            evdp = origins.depth / 1000.
+            #quality = origins.quality
+            mag_type = myevent.magnitudes[0].magnitude_type
+            mag = myevent.magnitudes[0].mag
+            event_type = myevent.event_type
+
+            if myevent.focal_mechanisms != []:  
+                
+                if mt_type == 'Moment_tensor':
+                    moment_tensor = myevent.focal_mechanisms[0].moment_tensor.tensor
+                    if moment_tensor is not None:
+                        eventid = myevent['resource_id'].id.split('&')[0].split('=')[1]
+                        m_rr = moment_tensor.m_rr
+                        m_tt = moment_tensor.m_tt
+                        m_pp = moment_tensor.m_pp
+                        m_rt = moment_tensor.m_rt
+                        m_rp = moment_tensor.m_rp
+                        m_tp = moment_tensor.m_tp
+                        
+                        #m_rr=3.315e+16, m_tt=-6.189e+16, m_pp=2.874e+16, m_rt=-5311000000000000.0, m_rp=-1.653e+16, m_tp=5044000000000000.0
+                        mt.append([evla, evlo, evdp, mag, m_rr, m_tt,m_pp,m_rt,m_rp,m_tp])
+                        event_id.append(eventid)
+                elif mt_type == 'Focal':
+                    nodal_plane = myevent.focal_mechanisms[0].nodal_planes.nodal_plane_1
+                    if nodal_plane is not None:
+                        eventid = myevent['resource_id'].id.split('&')[0].split('=')[1]
+                        mt.append([evla, evlo, evdp, mag, nodal_plane.strike, nodal_plane.dip, nodal_plane.rake])
+                        event_id.append(eventid)
+                elif mt_type == 'Both':
+                    
+                    nodal_plane = myevent.focal_mechanisms[0].nodal_planes.nodal_plane_1
+                    if nodal_plane is not None:
+                        eventid = myevent['resource_id'].id.split('&')[0].split('=')[1]
+                        mt.append([evla, evlo, evdp, mag, nodal_plane.strike, nodal_plane.dip, nodal_plane.rake])
+                        event_id.append(eventid)
+                        break
+                    else:
+                        pass
+                    
+                    moment_tensor = myevent.focal_mechanisms[0].moment_tensor.tensor
+                    if moment_tensor is not None:
+                        eventid = myevent['resource_id'].id.split('&')[0].split('=')[1]
+                        m_rr = moment_tensor.m_rr
+                        m_tt = moment_tensor.m_tt
+                        m_pp = moment_tensor.m_pp
+                        m_rt = moment_tensor.m_rt
+                        m_rp = moment_tensor.m_rp
+                        m_tp = moment_tensor.m_tp
+                        
+                        #m_rr=3.315e+16, m_tt=-6.189e+16, m_pp=2.874e+16, m_rt=-5311000000000000.0, m_rp=-1.653e+16, m_tp=5044000000000000.0
+                        mt.append([evla, evlo, evdp, mag, m_rr, m_tt,m_pp,m_rt,m_rp,m_tp])
+                        event_id.append(eventid)
+                    
+        
+            eq_matrix.append((evla, evlo, evdp, mag, mag_type, event_type, origins.time))
+
+        except:
+            continue
+        #print mt
+        #evla = origins[1]
+    
+    
+    evtime = [tmp.datetime for tmp in evtime_mat]
+    return earthquakes, mt
+
 def Ritsema_180_sections(midlon,midlat,az1):
     '''
     Direct link to Ritsema c-shell/fortran codes for plotting a 180 degree slice through several tomography models. Makes a pdf figure.
@@ -63,8 +165,11 @@ def Ritsema_180_sections(midlon,midlat,az1):
     print wdir
     cmddir = 'Ritsema_extraction_tools'
     os.chdir(cmddir)
+
+    #Ritsema code call
     os.system('./mkcr_all %g %g %g' %(midlat,midlon,az1))
 
+    #Ritsema code makes grd files with this name
     grdfiles = glob.glob('output_slices/uit*.grd')
 
     print '----------------------------------------------'
@@ -79,8 +184,6 @@ def Ritsema_180_sections(midlon,midlat,az1):
     slicetools.tracestackedslab(summedfilename)
 
     os.chdir(wdir)
-    dd =  os.getcwd()
-    print dd
 
 
 def coords_for_profile(lon0,lat0,lon1,lat1):
@@ -125,6 +228,11 @@ def get_quakes(startcoors,endcoors,minmag=5.0):
     print '---------------------\nUsing Obspy to get quakes\n---------------------'
 
     quakecat = client.get_events(starttime=UTCDateTime(starttime), endtime=UTCDateTime(endtime), minlongitude=minlon, maxlongitude=maxlon, minlatitude=minlat, maxlatitude=maxlat, minmagnitude=minmag,mindepth=mindepth)
+    
+    #Get the moment tensors for these events, if they exist
+    #Currenlty not working 
+    #quakes,mts = cat2list(quakecat)
+    #focmecs = [row[4:] for row in mts]
 
     for event in quakecat:
 
@@ -137,7 +245,7 @@ def get_quakes(startcoors,endcoors,minmag=5.0):
     quakefile.close()
 
     #Work out the distance from each quake to the profile line, and write to a file 
-        #Create the section coordinates. Should make some sort of auto-decision about the spacing
+    #Create the section coordinates. Should make some sort of auto-decision about the spacing
     sectionname = 'tmp_toposection.dat'
 
     print '---------------------\nMaking section through topography\n---------------------'
@@ -233,6 +341,12 @@ def Becker_slice(midlon,midlat,lon1,lat1,az1,model='all',dist=None,name=None,sho
     lon0 = midlon - (tdist/2)*np.sin(az1*(np.pi/180))
     lat0 = midlat - (tdist/2)*np.cos(az1*(np.pi/180))
 
+    print '\n----------------------------\n'
+
+    print lon0,lat0,lon1,lat1
+
+    print '\n----------------------------\n'
+
     #If there is some failure in the get_quakes routine, we just set the resulting variables 
     #to None type and confinue
 
@@ -248,7 +362,7 @@ def Becker_slice(midlon,midlat,lon1,lat1,az1,model='all',dist=None,name=None,sho
         ax1.plot(topoX,topoY,'k')
         ax1.set_xlabel('Distance along profile [km]')
         ax1.set_ylabel('Surface height [m]')
-        #ax1.set_xlim([min(X)-10,max(X)+10])
+        ax1.set_xlim([min(topoX),max(topoX)])
         ax1.set_ylim([min(topoY),max(topoY)])
         ax1.set_title('Topography')
 
@@ -256,10 +370,12 @@ def Becker_slice(midlon,midlat,lon1,lat1,az1,model='all',dist=None,name=None,sho
 
         ax2.plot(X,Y,'k.',label='Quake [D>60km M>5.0]')
         ax2.plot([0,maxdist],[0,0],'r--',linewidth=3)
-        #ax2.set_xlim([min(X)-10,max(X)+10])
+        ax2.set_xlim([min(topoX),max(topoX)])
         ax2.set_ylim([-700,50])
         ax2.set_xlabel('Distance along profile [km]')
         ax2.set_ylabel('Depth [km]')
+
+
         plt.tight_layout()
         plt.grid()
         plt.legend(loc='best')
@@ -335,7 +451,7 @@ def Becker_slice(midlon,midlat,lon1,lat1,az1,model='all',dist=None,name=None,sho
         if midlat == 0:
             midlat = 0.1
 
-        m = Basemap(ax=ax,llcrnrlon=(midlon-10),llcrnrlat=(midlat-10),urcrnrlon=(midlon+10),urcrnrlat=(midlat+11),resolution='l',projection='lcc',lat_0=midlat,lon_0=midlon)
+        m = Basemap(ax=ax,llcrnrlon=(midlon-20),llcrnrlat=(midlat-10),urcrnrlon=(midlon+16),urcrnrlat=(midlat+10),resolution='l',projection='lcc',lat_0=midlat,lon_0=midlon)
         #m.fillcontinents(color='coral',lake_color='aqua')
         m.drawmeridians(np.arange((midlon-20),(midlon+16),5),labels=[0,0,0,0])
         m.drawparallels(np.arange((midlat-10),(midlat+10),5),labels=[0,0,0,0])

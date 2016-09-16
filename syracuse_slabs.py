@@ -1,5 +1,7 @@
 #!/usr/bin/env python 
 
+#Sanne Cottar July 2016
+#plot some slab parameters
 
 from __future__ import print_function
 import numpy as np

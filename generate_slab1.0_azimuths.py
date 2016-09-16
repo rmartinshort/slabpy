@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 
+
+#RMS July 2016
+
 #Generate table of subduction parameters using information from the Syracuse paper
+#This was a 'one time' code to generate a list of slab strikes by interpolating the slab1.0 database at each of the points
+#from the Syracuse paper
 
 import os
 import glob
@@ -11,8 +16,13 @@ import Tools as tomotools
 import numpy as np
 
 #Path to models
+
+#--------------------------------------------
+#Important: The paths to these data directories must be updated on a new system
+# the becker directory also includes all of T.Becker's extraction code too
+#--------------------------------------------
 global becker_data_directory
-becker_data_directory = '/Users/rmartinshort/Documents/Workshops/CIDER_2016/Slab_group2/datasets/Profile_plotting'
+becker_data_directory = '/Volumes/TOSHIBA EXT/Workshops/CIDER_2016/Slab_group2/datasets/Profile_plotting'
 
 
 
@@ -129,6 +139,8 @@ def generate_grdtrackpoints(slabbounds):
 
 	#Make a record of Syracuse points that are not avaialble in the slab1.0 data, for some reason
 	NaNsfile = open('Undefined_points.dat','w')
+	SyracuseFile = open('Syracuse_points_bathymetry.dat','w')
+	SyracuseFile.write('Slice_name Start_lon Start_lat End_lon End_lat Strike Azimuth\n')
 
 	for slab in slabbounds:
 
@@ -165,10 +177,12 @@ def generate_grdtrackpoints(slabbounds):
 			os.system(command)
 
 			ifile = open(ofilename[:-3]+'strikes.dat','r')
+
 			lines = ifile.readlines()
 
 			#Distace in degrees to determine the cross section over 
 			tdist = 30
+
 
 			for line in lines:
 				vals = line.split()
@@ -178,12 +192,17 @@ def generate_grdtrackpoints(slabbounds):
 				strike = float(vals[3])
 				az1 = strike-90
 
+				lon1 = midlon + (tdist/2)*np.sin(az1*(np.pi/180))
+				lat1 = midlat + (tdist/2)*np.cos(az1*(np.pi/180))
+
+				lon0 = midlon - (tdist/2)*np.sin(az1*(np.pi/180))
+				lat0 = midlat - (tdist/2)*np.cos(az1*(np.pi/180))
+
 				#Sometimes the point falls outside the slab1.0 bounds. If this is the case, we write it to a file so we can investigate later
 
 				if not mt.isnan(az1):
 
-					lon1 = midlon + (tdist/2)*np.sin(az1*(np.pi/180))
-					lat1 = midlat + (tdist/2)*np.cos(az1*(np.pi/180))
+					SyracuseFile.write('%s %g %g %g %g %g %g\n' %(name,lon0,lat0,lon1,lat1,strike,az1))
 
 					print '--------------------------\n'
 					print 'Slice: %g %g %g %s' %(midlon,midlat,az1,name)
@@ -195,8 +214,11 @@ def generate_grdtrackpoints(slabbounds):
 
 					NaNsfile.write('%g %g %g %s\n' %(midlon,midlat,az1,name))
 
+					SyracuseFile.write('%s %g %g %g %g %g %g\n' %(name,lon0,lat0,lon1,lat1,strike,az1))
+
 
 	NaNsfile.close()
+	SyracuseFile.close()
 
 
 

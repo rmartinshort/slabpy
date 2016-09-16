@@ -63,8 +63,8 @@ foreach tckdist ( 30 60 )
   echo $ticks[2] $ticks[1] >>  ticks
 end
 
-#-- discreet colourscale (=0)
-set icont = 0
+#-- discreet colourscale (=0), continuous (=1)
+set icont = 1
 #-- black-and-white
 #-- TOMOGREY (6 values) for black-and-white 
 set col   = 0
@@ -164,6 +164,7 @@ while ($i < $n)
 
   echo "0 7000 10 0 0 BL $name[$i]"                           > text
   $GMT pstext text -R$MAP -J$PROJ -N -O -K -P >> slice.ps
+  mv uit.grd output_slices/uit_$lat1.$lon1.$lat2.$lon2.$i.grd
 
 end
 

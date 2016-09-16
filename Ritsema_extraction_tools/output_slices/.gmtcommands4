@@ -1,0 +1,12 @@
+# GMT common arguments shelf
+-Ba0.5f0.5g0.5/:Stacked velocity perturbation:
+-JP7i
+-R0/180/3480/6370
+-X2
+-x6
+-Y1.8
+-y12.0
+-jP7i
+EOF
+OF
+F

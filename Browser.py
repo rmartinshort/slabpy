@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+
+#RMS July 2016
+
+#Class that controls user interactions with the interactive map 
+
 import numpy as np
 import Tools as misctools
 import matplotlib.pyplot as plt
@@ -121,6 +126,8 @@ class PointBrowser:
 
             #Determine azimuth from the start point to the selected location
             azimuth = misctools.coords_for_profile(self.linelons[0],self.linelats[0],self.linelons[1],self.linelats[1])
+
+            #Two options here: Use Ritsema codes to generate slice through the region of interest or use Becker codes
 
             #print 'Getting ready to run Ritsema codes with midlon/midlat = %g/%g and azimuth of %g' %(midlon,midlat,azimuth)
             #misctools.Ritsema_180_sections(midlon,midlat,azimuth)

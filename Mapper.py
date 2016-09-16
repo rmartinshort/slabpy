@@ -1,5 +1,9 @@
 #!/usr/bin/env python 
 
+#RMS July 2016
+
+#Class for the interactive map: user can draw lines and generate tomography profiles
+
 import numpy as np
 import matplotlib 
 import matplotlib.pyplot as plt

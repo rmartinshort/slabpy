@@ -4,7 +4,7 @@
 #-------- Plot Media Parameters -------------
 PAGE_COLOR		= white
 PAGE_ORIENTATION	= landscape
-PAPER_MEDIA		= letter+
+PAPER_MEDIA		= letter
 #-------- Basemap Annotation Parameters ------
 ANNOT_MIN_ANGLE		= 20
 ANNOT_MIN_SPACING	= 0
@@ -19,7 +19,7 @@ HEADER_FONT		= Helvetica
 HEADER_FONT_SIZE	= 36p
 HEADER_OFFSET		= 0.19685i
 LABEL_FONT		= Helvetica
-LABEL_FONT_SIZE		= 36p
+LABEL_FONT_SIZE		= 24p
 LABEL_OFFSET		= 0.11811i
 OBLIQUE_ANNOTATION	= 1
 PLOT_CLOCK_FORMAT	= hh:mm:ss

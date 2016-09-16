@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+#Create a series of slab objects for the slab1.0 catalog
+
 from __future__ import print_function
 import numpy as np
 from scipy.io import netcdf

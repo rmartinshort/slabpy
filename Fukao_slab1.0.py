@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+#RMS July 2016 
+
 #Script to read both the Fukao slab data and slab1.0, and plot on the interactive map
 
 import Fukao_slabs as read_fukao

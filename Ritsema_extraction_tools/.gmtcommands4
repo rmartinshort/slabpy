@@ -1,14 +1,14 @@
 # GMT common arguments shelf
--B90g45
--JG-115.497894/-14.4375286/1.2
--JP3.0
+-Ba0.5f0.5g0.5/:Stacked velocity perturbation:
+-JG90.5733719/-23.2402916/1.2
+-JP7i
 -JX3.5/.2
--R-1/1/0/1
+-R0/180/3480/6370
 -X2
--x1.3
+-x6
 -Y1.8
--y-0.20
--jX3.5/.2
+-y12.0
+-jP7i
 EOF
-7894/-14.4375286/1.2
-EOF
+
+

@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+# determine the sum of all grd entries
+#
+# $Id: grd2sum,v 1.1 2002-10-21 16:48:10-07 tbecker Exp $
+#
+
+GMT=gmt4
+
+if [ $# -eq 0 ];then
+    echo `basename $0` grd_file > /dev/stderr
+    echo > /dev/stderr
+    echo calculates the sum of all elements of a grid file > /dev/stderr
+    exit
+fi
+if [ -s $1 ];then
+    name=$1
+else
+    if [ -s $1.grd ];then
+	name=$1.grd
+    else
+	echo $1 or $1.grd are nonexistent.
+	exit
+    fi
+fi
+
+$GMT gmtset D_FORMAT %20.15e
+
+#grd2xyz -S -Z $name | gawk '{x+=$1}END{print(x)}'
+$GMT grd2xyz -S  $name -Zf | sumfloatbin
+
+# for gmt version probs, this commented out
+#echo `mygrdinfo -C -S $name | gawk '{printf("%20.15e\n",$12)}'`
+$GMT gmtset D_FORMAT %lg
+
+
+
+

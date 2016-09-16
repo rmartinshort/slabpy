@@ -1,5 +1,7 @@
-  
 #!/usr/bin/env python 
+
+#RMS July 2016
+#Base class for slab objects
 
 from __future__ import print_function
 import numpy as np

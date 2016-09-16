@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+#RMS July 2016
+#Read in the slab coordinates from the Fukao and Obayashi paper - these will be plotted in the interactive map 
+
 from __future__ import print_function
 import numpy as np
 from slab import Slab

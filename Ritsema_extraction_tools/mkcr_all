@@ -57,8 +57,6 @@ rm slice.ps
 #-- clean up
 rm in_mdlwellln_jr gcpath ticks mkcut.in mkcut.out col.cpt
 rm in_mkrb uit.grd uit.xy text
-
-
 mv ?.xyz output_slices
 
 #display

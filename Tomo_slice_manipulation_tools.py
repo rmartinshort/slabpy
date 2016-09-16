@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 
+#RMS 2016
+
 #Tools for manipulation and comparision of tomography cross sections
+
+#This code is not currently used in tomo-plotting pacakges. It will stack grdfiles and produce an image from the result
 
 import numpy as np
 from netCDF4 import Dataset
@@ -114,7 +118,7 @@ def plotfigs(model=None,axobj=None,i=0,infile=None,stack=True,datatracker=None,n
 			# ax.plot(quakepoints,quakedepths,'g.',linewidth=0.4)
 
 			if i == 2:
-				ax.text(30, 200, 'Max earthquake depth: %g km' %-min(quakes[1]), style='italic',bbox={'facecolor':'red', 'alpha':0.5, 'pad':10})
+				ax.text(30, 130, 'Max earthquake depth: %g km' %-min(quakes[1]), style='italic',bbox={'facecolor':'red', 'alpha':0.5, 'pad':10})
 
 	ax.set_title('%s' %model)
 
@@ -202,6 +206,8 @@ def tracestackedslab(infile,depthinc=5,llinc=((6371*np.pi)/360),cval=0.5):
 
 
 if __name__ == '__main__':
+
+	#Testing: evidently we had a group of files with name uit, and we wated to investigate if this worked
 
 	grdfiles = glob.glob('uit*.grd')
 	print grdfiles
